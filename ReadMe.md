@@ -6,19 +6,18 @@ Tools and configuration to test peformance of ArcGIS map and feature services us
 ## Features
 
 * Creates a CSV file of extents to be used as input for testing web requests using JMeter - A batch file to create extents for all scales or individual scales. Parameters required:
-	* Polygon Feature Class e.g. "C:\Temp\Data\GeneralData.gdb\NewZealandLand"
-	* Image DPI e.g. "96"
-	* image Size e.g. "1024,768"
-	* Scales e.g. "9244648.868618,4622324.434309,2311162.217155,1155581.108577,577790.554289,288895.277144,144447.638572,72223.819286,36111.909643,18055.954822,9027.977411,4513.988705,2256.994353,1128.497176,564.248588,282.124294"
-	* Number of Samples e.g. "100"
-	* Output CSV e.g. "C:\Temp\Data\JMeter Web Test Data.csv"
+	* Polygon feature class of the extent to create test data for e.g. "C:\Temp\Data\GeneralData.gdb\NewZealandLand"
+	* Image DPI for all requests e.g. "96"
+	* Image size (width and height) for all requests e.g. "1024,768"
+	* Scales to use in requests e.g. "4513.988705,2256.994353,1128.497176,564.248588" or "4513.988705" for just one scsale
+	* Service URLs to use in request. Can be map service, map service layer or feature service. Do not put protocol. e.g. "services.arcgis.com/XTtANUDT8Va4DLwI/arcgis/rest/services/New_Zealand_Schools/FeatureServer/0,services.arcgis.com/XTtANUDT8Va4DLwI/arcgis/rest/services/NZ_Base_Data_Fire_Station_Locations_2008/FeatureServer/0"
+	* URL to portal site
+	* Portal user that has access to the services
+	* Portal user password
+	* Number of samples to create e.g. "100"
+	* Location of output CSV to be created e.g. "%~dp0\Input Extents\Extents - New Zealand Land (NZTM).csv"
 Example output [here](/Input Extents)
-* [JMeter .jmx configuration files](/JMeter Configuration) to be opened and run in JMeter - Dynamic map service and feature service draw test for all or individual scales. Parameters required for Test Plan:
-	* CSV Extents Path e.g. "C:\Temp\Data\JMeter Configuration"
-	* Protocol DPI e.g. "https"
-	* ServerName e.g. "ec2-52-64-20-102.ap-southeast-2.compute.amazonaws.com"
-	* Port Number e.g. "443"
-	* HTTP Request e.g. "arcgis/rest/services/MPI/NZ_Parcels_FGDB/MapServer/export?"
+* [JMeter .jmx configuration files](/JMeter Configuration) to be opened and run in JMeter - Dynamic map service and feature service draw test for all or individual scales.
 * Creates a report table showing the draw times for a particular service.
 
 
@@ -39,36 +38,3 @@ Example output [here](/Input Extents)
 * Open one of the [JMeter .jmx configuration files](/JMeter Configuration)
 * Set the input parameters for the test plan.
 * Run the test plan.
-
-
-## Resources
-
-* [GitHub](https://github.com/eaglegis)
-* [Twitter](https://twitter.com/eaglegis)
-* [Python for ArcGIS](http://resources.arcgis.com/en/communities/python)
-
-
-## Issues
-
-Find a bug or want to request a new feature?  Please let us know by submitting an issue.
-
-
-## Contributing
-
-Anyone and everyone is welcome to contribute. 
-
-
-## Licensing
-Copyright 2017 - Eagle Technology
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.

@@ -4,7 +4,7 @@
 #             web requests using JMeter.
 # Author:     Shaun Weston (shaun_weston@eagle.co.nz)
 # Date Created:    10/11/2017
-# Last Updated:    11/11/2017
+# Last Updated:    07/02/2019
 # Copyright:   (c) Eagle Technology
 # ArcGIS Version:   ArcMap 10.1+
 # Python Version:   2.7+
@@ -53,10 +53,12 @@ else:
     import urllib2
 import csv
 import random
-
+import urllib
+import ssl
+import json
 
 # Start of main function
-def mainFunction(polygonFeatureClass,imageDPI,imageSize,scales,numberOfSamples,outputCSV): # Get parameters from ArcGIS Desktop tool by seperating by comma e.g. (var1 is 1st parameter,var2 is 2nd parameter,var3 is 3rd parameter)
+def mainFunction(polygonFeatureClass,imageDPI,imageSize,scales,services,portalURL,portalUser,portalPassword,numberOfSamples,outputCSV): # Get parameters from ArcGIS Desktop tool by seperating by comma e.g. (var1 is 1st parameter,var2 is 2nd parameter,var3 is 3rd parameter)
     try:
         # --------------------------------------- Start of code --------------------------------------- #
         # Generate random points and add coordinates
@@ -69,6 +71,8 @@ def mainFunction(polygonFeatureClass,imageDPI,imageSize,scales,numberOfSamples,o
         arcpy.AddField_management(os.path.join(arcpy.env.scratchGDB, "SamplePoints"), "YMax", "DOUBLE", "", "", "", "", "NULLABLE", "NON_REQUIRED", "")
         arcpy.AddField_management(os.path.join(arcpy.env.scratchGDB, "SamplePoints"), "Scale", "LONG", "", "", "", "", "NULLABLE", "NON_REQUIRED", "")
         arcpy.AddField_management(os.path.join(arcpy.env.scratchGDB, "SamplePoints"), "MaxAllowableOffset", "DOUBLE", "", "", "", "", "NULLABLE", "NON_REQUIRED", "")
+        arcpy.AddField_management(os.path.join(arcpy.env.scratchGDB, "SamplePoints"), "Service", "TEXT", "", "", "255", "", "NULLABLE", "NON_REQUIRED", "")
+        arcpy.AddField_management(os.path.join(arcpy.env.scratchGDB, "SamplePoints"), "Token", "TEXT", "", "", "255", "", "NULLABLE", "NON_REQUIRED", "")
 
         # Get the image width and height
         imageSize = imageSize.split(',')
@@ -76,13 +80,24 @@ def mainFunction(polygonFeatureClass,imageDPI,imageSize,scales,numberOfSamples,o
         # Get the scales
         scales = scales.split(',')
 
+        # Get the services
+        services = services.split(',')
+
+        # Request a token for the service if needed
+        token = ""
+        if ((portalURL) and (portalUser) and (portalPassword)):
+            token = getToken(portalURL,portalUser,portalPassword)
+        
         # Go through each point in the feature class
         printMessage("Calculating extent for each point" + "...","info")
-        with arcpy.da.UpdateCursor(os.path.join(arcpy.env.scratchGDB, "SamplePoints"), ["POINT_X","POINT_Y","XMin","YMin","XMax","YMax","Scale","MaxAllowableOffset"]) as updateCursor:
+        with arcpy.da.UpdateCursor(os.path.join(arcpy.env.scratchGDB, "SamplePoints"), ["POINT_X","POINT_Y","XMin","YMin","XMax","YMax","Scale","MaxAllowableOffset","Service","Token"]) as updateCursor:
             # For each row in the table
             for row in updateCursor:
                 # Randomly pick a scale from the list
                 scale = random.choice(scales)
+                # Randomly pick a service from the list
+                service = random.choice(services)
+
                 # Get the map height and width for the image size and scale
                 mapWidthHalf =  (((float(imageSize[0])/float(imageDPI)) * 0.0254) * float(scale)) / 2
                 mapHeightHalf =  (((float(imageSize[1])/float(imageDPI)) * 0.0254) * float(scale)) / 2
@@ -97,6 +112,8 @@ def mainFunction(polygonFeatureClass,imageDPI,imageSize,scales,numberOfSamples,o
                 row[5] = row[1] + mapHeightHalf
                 row[6] = scale
                 row[7] = maxAllowableOffset
+                row[8] = service
+                row[9] = token
                 updateCursor.updateRow(row)
 
         # Create a CSV file and setup header
@@ -113,11 +130,13 @@ def mainFunction(polygonFeatureClass,imageDPI,imageSize,scales,numberOfSamples,o
         headerRow.append("YMax")
         headerRow.append("Scale")
         headerRow.append("MaxAllowableOffset")
+        headerRow.append("Service")
+        headerRow.append("Token")
         writer.writerow(headerRow)
 
         # Write in each of the values for all of the records
         printMessage("Creating the CSV File - " + outputCSV + "...","info")
-        with arcpy.da.SearchCursor(os.path.join(arcpy.env.scratchGDB, "SamplePoints"), ["POINT_X","POINT_Y","XMin","YMin","XMax","YMax","Scale","MaxAllowableOffset"]) as searchCursor:
+        with arcpy.da.SearchCursor(os.path.join(arcpy.env.scratchGDB, "SamplePoints"), ["POINT_X","POINT_Y","XMin","YMin","XMax","YMax","Scale","MaxAllowableOffset","Service","Token"]) as searchCursor:
             # For each row in the table
             for row in searchCursor:
                 # For each value in the row
@@ -210,6 +229,37 @@ def mainFunction(polygonFeatureClass,imageDPI,imageSize,scales,numberOfSamples,o
             # Send email
             sendEmail(errorMessage)
 # End of main function
+
+
+# Start of get token function
+def getToken(portalURL,portalUser,portalPassword):
+    printMessage("Getting portal token - " + portalURL + "/sharing/rest/generateToken","info")
+        
+    # Setup the parameters
+    parameters = urllib.urlencode({'username': portalUser,
+                  'password': portalPassword,
+                  'client': 'referer',
+                  'referer': portalURL,
+                  'expiration': '1440',
+                  'f': 'json'})
+    queryString = parameters.encode('utf-8')
+
+    # Request to get token
+    try:
+        context = ssl._create_unverified_context()
+        request = urllib2.Request(portalURL + "/sharing/rest/generateToken",queryString)
+        responseJSON = json.loads(urllib2.urlopen(request, context=context).read())
+        if "error" in responseJSON:
+            printMessage(responseJSON,"error")
+            return None
+        else:
+            token = responseJSON.get('token')
+            return token
+    except urllib2.URLError, error:
+        printMessage("Could not connect...","error")
+        printMessage(error,"error")
+        return None
+# End of get token function
 
 
 # Start of print message function

@@ -6,33 +6,7 @@
       <boolProp name="TestPlan.functional_mode">false</boolProp>
       <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
-        <collectionProp name="Arguments.arguments">
-          <elementProp name="CSVExtentsPath" elementType="Argument">
-            <stringProp name="Argument.name">CSVExtentsPath</stringProp>
-            <stringProp name="Argument.value">C:\Development\Tools &amp; Scripts\ArcGIS JMeter Web Test\JMeter Configuration Examples\Extents</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="Protocol" elementType="Argument">
-            <stringProp name="Argument.name">Protocol</stringProp>
-            <stringProp name="Argument.value">https</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="ServerName" elementType="Argument">
-            <stringProp name="Argument.name">ServerName</stringProp>
-            <stringProp name="Argument.value">services2.arcgis.com</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="PortNumber" elementType="Argument">
-            <stringProp name="Argument.name">PortNumber</stringProp>
-            <stringProp name="Argument.value">443</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="HTTPRequest" elementType="Argument">
-            <stringProp name="Argument.name">HTTPRequest</stringProp>
-            <stringProp name="Argument.value">28amRQMPTiEvaF1p/arcgis/rest/services/NZ_Roads_EGDB/FeatureServer/0/query?</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-        </collectionProp>
+        <collectionProp name="Arguments.arguments"/>
       </elementProp>
       <stringProp name="TestPlan.user_define_classpath"></stringProp>
     </TestPlan>
@@ -53,9 +27,9 @@
       </ThreadGroup>
       <hashTree>
         <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config " enabled="true">
-          <stringProp name="filename">${CSVExtentsPath}\Extents - New Zealand Land (NZTM).csv</stringProp>
+          <stringProp name="filename">C:\Development\Tools &amp; Scripts\ArcGIS JMeter Web Test\Input Data\Extents - New Zealand Land (NZTM).csv</stringProp>
           <stringProp name="fileEncoding"></stringProp>
-          <stringProp name="variableNames">X,Y,XMin,YMin,XMax,YMax,Scale,MaxAllowableOffset</stringProp>
+          <stringProp name="variableNames">X,Y,XMin,YMin,XMax,YMax,Scale,MaxAllowableOffset,Service,Token</stringProp>
           <boolProp name="ignoreFirstLine">true</boolProp>
           <stringProp name="delimiter">,</stringProp>
           <boolProp name="quotedData">false</boolProp>
@@ -130,15 +104,22 @@
                 <boolProp name="HTTPArgument.use_equals">true</boolProp>
                 <stringProp name="Argument.name">outFields</stringProp>
               </elementProp>
+              <elementProp name="token" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">${Token}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+                <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                <stringProp name="Argument.name">token</stringProp>
+              </elementProp>
             </collectionProp>
           </elementProp>
-          <stringProp name="HTTPSampler.domain">${ServerName}</stringProp>
-          <stringProp name="HTTPSampler.port">${PortNumber}</stringProp>
-          <stringProp name="HTTPSampler.protocol">${Protocol}</stringProp>
+          <stringProp name="HTTPSampler.domain"></stringProp>
+          <stringProp name="HTTPSampler.port"></stringProp>
+          <stringProp name="HTTPSampler.protocol">https</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-          <stringProp name="HTTPSampler.path">${HTTPRequest}</stringProp>
+          <stringProp name="HTTPSampler.path">//${Service}/query?</stringProp>
           <stringProp name="HTTPSampler.method">GET</stringProp>
-          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.follow_redirects">false</boolProp>
           <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
           <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
